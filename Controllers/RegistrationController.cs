@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LoginRegistrationApi.Models;
+using LoginRegistrationApi.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LoginRegistrationApi.Controllers
@@ -7,11 +9,24 @@ namespace LoginRegistrationApi.Controllers
     [ApiController]
     public class RegistrationController : ControllerBase
     {
-        public RegistrationController() { }
-        [HttpPost("Register")]
-        public ActionResult<string> ActionResult(string username, string password)
+        private readonly ILogger<RegistrationController> _logger;
+        private readonly RegistrationRepo _registrationRepo;
+        public RegistrationController(ILogger<RegistrationController> logger, RegistrationRepo registrationRepo)
         {
-            return "Hello " + username;
+            _logger = logger;
+            _registrationRepo = registrationRepo;
+        }
+        [HttpPost("Register")]
+        public async Task<IActionResult> Registration([FromBody] UserModel user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            // Here you would typically add code to save the user to a database
+            await _registrationRepo.RegisterUserAsync(user);
+
+            return Ok("Registration successful");
         }
     }
 }

@@ -22,20 +22,35 @@ namespace LoginRegistrationApi.Repository
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
             user.Password = _passwordHasher.HashPassword(user, user.Password);
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync(); // <-- Save to database
 
             return "Registration successful";
         }
-        public async Task<bool> LoginUserAsync(string username, string password)
+        public async Task<UserModel?> GetUserAsync(string username, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(user => user.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
             {
-                return false;
+                return null;
             }
+
+            // Verify password hash
             var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
-            return result == PasswordVerificationResult.Success;
+            if (result == PasswordVerificationResult.Success)
+            {
+                return user; // ✅ return the full user object
+            }
+
+            return null;
         }
+        public async Task UpdateUserAsync(UserModel user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

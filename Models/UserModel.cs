@@ -30,5 +30,11 @@ namespace LoginRegistrationApi.Models
 
         [Required(ErrorMessage = "Date of birth is required")]
         public DateTime DateOfBirth { get; set; } = DateTime.MinValue;
+
+        // Refresh Token fields
+        [JsonIgnore]
+        public string? RefreshToken { get; set; }
+        [JsonIgnore]
+        public DateTime? RefreshTokenExpiryTime { get; set; }
     }
 }
